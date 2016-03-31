@@ -20,6 +20,7 @@ namespace Lkytal.StatusInfo
 		{
 			this.window = pWindow;
 			this.window.Initialized += new EventHandler(this.window_Initialized);
+
 			this.FindStatusBar();
 		}
 

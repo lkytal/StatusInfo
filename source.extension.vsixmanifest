@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
 	<Metadata>
-		<Identity Id="72581eb6-4dcd-4b8f-9add-c4257d4fb9d7" Version="1.0" Language="en-US" Publisher="Lkytal" />
+		<Identity Id="72581eb6-4dcd-4b8f-9add-c4257d4fb9d7" Version="1.0.3" Language="en-US" Publisher="Lkytal" />
 		<DisplayName>StatusInfo</DisplayName>
 		<Description>Information about my package</Description>
 	</Metadata>

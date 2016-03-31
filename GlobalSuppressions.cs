@@ -13,4 +13,5 @@
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Variable", "JustCode_ImplicitTypedVariableDeclarationMisused:Not implicitly typed local variable")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1001:TypesThatOwnDisposableFieldsShouldBeDisposable", Scope = "type", Target = "Lkytal.StatusInfo.StatusInfoPackage")]
 
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("TypeFileNameMismatch", "JustCode_CSharp_TypeFileNameMismatch:Types not matching file names", Justification = "<挂起>", Scope = "type", Target = "~T:Lkytal.StatusInfo.GuidList")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("TypeFileNameMismatch", "JustCode_CSharp_TypeFileNameMismatch:Types not matching file names")]
+

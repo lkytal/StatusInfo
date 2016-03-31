@@ -34,7 +34,8 @@ namespace Lkytal.StatusInfo
 	[InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
 	[Guid(GuidList.guidStatusInfoPkgString)]
 
-	[ProvideAutoLoad("{10534154-102D-46E2-ABA8-A6BFA25BA0BE}")]
+	[ProvideAutoLoad(UIContextGuids80.NoSolution)]
+	//[ProvideAutoLoad(UIContextGuids80.SolutionExists)]
 	[ProvideOptionPage(typeof(OptionsPage), "StatusBar Info", "General", 0, 0, true)]
 
 	public sealed class StatusInfoPackage : Package
@@ -47,32 +48,23 @@ namespace Lkytal.StatusInfo
 		/// initialization is the Initialize method.
 		/// </summary>
 
-		private readonly Timer RefreshTimer;
+		private Timer RefreshTimer;
 
-		private readonly Process IdeProcess;
+		private Process IdeProcess;
 
-		private readonly StatusBarInjector Injector;
+		private StatusBarInjector Injector;
 
-		private readonly InfoControl InfoControl;
+		private InfoControl InfoControl;
 
-		private readonly PerformanceCounter TotalCpuCounter;
+		private PerformanceCounter TotalCpuCounter;
 
-		private readonly PerformanceCounter TotalRamCounter;
+		private PerformanceCounter TotalRamCounter;
 
 		private OptionsPage OptionsPage;
 
 		public StatusInfoPackage()
 		{
 			Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));
-
-			this.RefreshTimer = new Timer(1000);
-			this.RefreshTimer.Elapsed += new ElapsedEventHandler(this.RefreshTimerElapsed);
-			this.RefreshTimer.Disposed += new EventHandler(this.RefreshTimerDisposed);
-			this.IdeProcess = Process.GetCurrentProcess();
-			this.InfoControl = new InfoControl((long)(new ComputerInfo()).TotalPhysicalMemory);
-			this.Injector = new StatusBarInjector(Application.Current.MainWindow);
-			this.TotalCpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-			this.TotalRamCounter = new PerformanceCounter("Memory", "Available Bytes");
 		}
 
 		/////////////////////////////////////////////////////////////////////////////
@@ -85,14 +77,44 @@ namespace Lkytal.StatusInfo
 		/// </summary>
 		protected override void Initialize()
 		{
-			Debug.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
+			Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
 
 			base.Initialize();
+
+			IVsShell ShellService = this.GetService(typeof(SVsShell)) as IVsShell;
+
+			EnvDTE80.DTE2 Dte = this.GetService(typeof(Microsoft.VisualStudio.Shell.Interop.SDTE)) as EnvDTE80.DTE2;
+			
+			if (Dte == null)
+			{
+				new DteInitializer(ShellService, InitExt);
+			}
+			else
+			{
+				//Application.Current.MainWindow.Initialized += new EventHandler((s ,e) => InitExt());
+				InitExt();
+			}
+		}
+
+		private void InitExt()
+		{
+			//Application.Current.MainWindow.Initialized += new EventHandler(this.Initialized);
+
+			this.RefreshTimer = new Timer(1000);
+			this.RefreshTimer.Elapsed += new ElapsedEventHandler(this.RefreshTimerElapsed);
+			this.RefreshTimer.Disposed += new EventHandler(this.RefreshTimerDisposed);
+			this.IdeProcess = Process.GetCurrentProcess();
+			this.InfoControl = new InfoControl((long)(new ComputerInfo()).TotalPhysicalMemory);
+			this.Injector = new StatusBarInjector(Application.Current.MainWindow);
+			this.TotalCpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+			this.TotalRamCounter = new PerformanceCounter("Memory", "Available Bytes");
+			//end of construct
 
 			this.IdeProcess.InitCpuUsage();
 			this.Injector.InjectControl(this.InfoControl);
 			this.OptionsPage = base.GetDialogPage(typeof(OptionsPage)) as OptionsPage;
 
+			UpdateInfoBar();
 			this.RefreshTimer.Enabled = true;
 		}
 		#endregion
@@ -127,6 +149,11 @@ namespace Lkytal.StatusInfo
 
 		private void RefreshTimerElapsed(object sender, ElapsedEventArgs e)
 		{
+			UpdateInfoBar();
+		}
+
+		private void UpdateInfoBar()
+		{
 			this.InfoControl.Dispatcher.Invoke(() =>
 			{
 				this.InfoControl.CpuUsage = (int)(this.IdeProcess.GetCpuUsage() * 100);
@@ -134,6 +161,43 @@ namespace Lkytal.StatusInfo
 				this.InfoControl.TotalCpuUsage = (int)this.TotalCpuCounter.NextValue();
 				this.InfoControl.FreeRam = this.TotalRamCounter.NextSample().RawValue;
 			});
+		}
+	}
+
+	internal class DteInitializer : IVsShellPropertyEvents
+	{
+		private IVsShell ShellService;
+		private uint Cookie;
+		private Action Callback;
+
+		internal DteInitializer(IVsShell shellService, Action callback)
+		{
+			this.ShellService = shellService;
+			this.Callback = callback;
+
+			// Set an event handler to detect when the IDE is fully initialized
+			int hr = this.ShellService.AdviseShellPropertyChanges(this, out this.Cookie);
+
+			Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(hr);
+		}
+
+		int IVsShellPropertyEvents.OnShellPropertyChange(int propid, object var)
+		{
+			if (propid != (int)__VSSPROPID.VSSPROPID_Zombie || (bool)var == false) //- 9053 
+			{
+				return 0;
+			}
+
+			// Release the event handler to detect when the IDE is fully initialized
+			int hr = this.ShellService.UnadviseShellPropertyChanges(this.Cookie);
+
+			Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(hr);
+
+			this.Cookie = 0;
+
+			this.Callback();
+
+			return VSConstants.S_OK;
 		}
 	}
 }
