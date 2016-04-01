@@ -30,9 +30,9 @@ namespace Lkytal.StatusInfo
 		{
 			set
 			{
-				string str = string.Format("{0,2}%", value);
-				this.textBlockLists["<CPU>"].Text = str;
-				this.textBlockLists["<#CPU>"].Text = str;
+				string CpuValue = string.Format("{0,2}%", value);
+				this.textBlockLists["<CPU>"].Text = CpuValue;
+				this.textBlockLists["<#CPU>"].Text = CpuValue;
 				this.textBlockLists["<#CPU>"].Foreground = this.GetCpuColor(value);
 			}
 		}
@@ -80,21 +80,25 @@ namespace Lkytal.StatusInfo
 			set
 			{
 				long num = this.totalRam - value;
-				string readableByteSize = num.ToReadableByteSize();
+				string readableByteSize = num.ToReadableByteSize("####.00");
+
 				this.textBlockLists["<TOTAL_USE_RAM>"].Text = readableByteSize;
 				this.textBlockLists["<#TOTAL_USE_RAM>"].Text = readableByteSize;
 				this.textBlockLists["<#TOTAL_USE_RAM>"].Foreground = this.GetRamColor(num);
+
 				int num1 = (int) (num * (long) 100 / this.totalRam);
-				readableByteSize = string.Format("{0}%", num1);
+				readableByteSize = string.Format("{0:####.00}%", num1);
 				this.textBlockLists["<TOTAL_USE_RAM%>"].Text = readableByteSize;
 				this.textBlockLists["<#TOTAL_USE_RAM%>"].Text = readableByteSize;
 				this.textBlockLists["<#TOTAL_USE_RAM%>"].Foreground = this.GetRamColor(num);
-				readableByteSize = value.ToReadableByteSize();
+
+				readableByteSize = value.ToReadableByteSize("####.00");
 				this.textBlockLists["<FREE_RAM>"].Text = readableByteSize;
 				this.textBlockLists["<#FREE_RAM>"].Text = readableByteSize;
 				this.textBlockLists["<#FREE_RAM>"].Foreground = this.GetRamColor(num);
+
 				num1 = (int) (value * (long) 100 / this.totalRam);
-				readableByteSize = string.Format("{0}%", num1);
+				readableByteSize = string.Format("{0:####.00}%", num1);
 				this.textBlockLists["<FREE_RAM%>"].Text = readableByteSize;
 				this.textBlockLists["<#FREE_RAM%>"].Text = readableByteSize;
 				this.textBlockLists["<#FREE_RAM%>"].Foreground = this.GetRamColor(num);
@@ -105,12 +109,13 @@ namespace Lkytal.StatusInfo
 		{
 			set
 			{
-				string readableByteSize = value.ToReadableByteSize();
+				string readableByteSize = value.ToReadableByteSize("####.00");
 				this.textBlockLists["<RAM>"].Text = readableByteSize;
 				this.textBlockLists["<#RAM>"].Text = readableByteSize;
 				this.textBlockLists["<#RAM>"].Foreground = this.GetRamColor(value);
+
 				int num = (int) (value * (long) 100 / this.totalRam);
-				readableByteSize = string.Format("{0}%", num);
+				readableByteSize = string.Format("{0:####.00}%", num);
 				this.textBlockLists["<RAM%>"].Text = readableByteSize;
 				this.textBlockLists["<#RAM%>"].Text = readableByteSize;
 				this.textBlockLists["<#RAM%>"].Foreground = this.GetCpuColor(num);
@@ -121,9 +126,9 @@ namespace Lkytal.StatusInfo
 		{
 			set
 			{
-				string str = string.Format("{0,2}%", value);
-				this.textBlockLists["<TOTAL_CPU>"].Text = str;
-				this.textBlockLists["<#TOTAL_CPU>"].Text = str;
+				string TotalCpuValue = string.Format("{0,2}%", value);
+				this.textBlockLists["<TOTAL_CPU>"].Text = TotalCpuValue;
+				this.textBlockLists["<#TOTAL_CPU>"].Text = TotalCpuValue;
 				this.textBlockLists["<#TOTAL_CPU>"].Foreground = this.GetCpuColor(value);
 			}
 		}
@@ -150,8 +155,8 @@ namespace Lkytal.StatusInfo
 		{
 			string[] strArrays = new string[] { "CPU", "TOTAL_CPU", "RAM", "FREE_RAM", "TOTAL_USE_RAM", "RAM%", "FREE_RAM%", "TOTAL_USE_RAM%" };
 			InfoControl.Formats = strArrays;
-			string[] strArrays1 = new string[] { "Cpu usage of Visual Studio", "Cpu usage of computer", "Ram usage of Visual Studio", "Free ram of computer", "Ram usage of computer", "Ram usage of Visual Studio in percent", "Free ram of computer in percent", "Ram usage of computer in percent" };
-			InfoControl.FormatDescriptions = strArrays1;
+			string[] strArrayDescriptions = new string[] { "Cpu usage of Visual Studio", "Cpu usage of computer", "Ram usage of Visual Studio", "Free ram of computer", "Ram usage of computer", "Ram usage of Visual Studio in percent", "Free ram of computer in percent", "Ram usage of computer in percent" };
+			InfoControl.FormatDescriptions = strArrayDescriptions;
 		}
 
 		public InfoControl(long pTotalRam)
@@ -159,7 +164,7 @@ namespace Lkytal.StatusInfo
 			this.totalRam = pTotalRam;
 			this.InitializeComponent();
 			this.textBlockLists = new Dictionary<string, TextBlockList>();
-			this.Format = "IDEStatusBarInfos is loading...";
+			this.Format = "Loading StatusBarInfos...";
 		}
 
 		private Brush GetCpuColor(int cpu)
@@ -217,11 +222,10 @@ namespace Lkytal.StatusInfo
 		private void InitTextBlockLists()
 		{
 			string[] formats = InfoControl.Formats;
-			for (int i = 0; i < (int) formats.Length; i++)
+			for (int i = 0; i < formats.Length; i++)
 			{
-				string textBlockList = formats[i];
-				this.textBlockLists[string.Format("<{0}>", textBlockList)] = new TextBlockList();
-				this.textBlockLists[string.Format("<#{0}>", textBlockList)] = new TextBlockList();
+				this.textBlockLists[string.Format("<{0}>", formats[i])] = new TextBlockList();
+				this.textBlockLists[string.Format("<#{0}>", formats[i])] = new TextBlockList();
 			}
 		}
 	}

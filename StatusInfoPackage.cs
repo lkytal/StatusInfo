@@ -12,7 +12,6 @@ using Microsoft.VisualBasic.Devices;
 using System.Runtime.CompilerServices;
 using System.Timers;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace Lkytal.StatusInfo
 {
@@ -69,8 +68,6 @@ namespace Lkytal.StatusInfo
 
 		/////////////////////////////////////////////////////////////////////////////
 		// Overridden Package Implementation
-		#region Package Members
-
 		/// <summary>
 		/// Initialization of the package; this method is called right after the package is sited, so this is the place
 		/// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -83,15 +80,16 @@ namespace Lkytal.StatusInfo
 
 			IVsShell ShellService = this.GetService(typeof(SVsShell)) as IVsShell;
 
-			EnvDTE80.DTE2 Dte = this.GetService(typeof(Microsoft.VisualStudio.Shell.Interop.SDTE)) as EnvDTE80.DTE2;
-			
-			if (Dte == null)
+			Object obj;
+
+			ShellService.GetProperty(-9053, out obj);
+
+			if ((bool)obj == false)
 			{
 				new DteInitializer(ShellService, InitExt);
 			}
 			else
 			{
-				//Application.Current.MainWindow.Initialized += new EventHandler((s ,e) => InitExt());
 				InitExt();
 			}
 		}
@@ -114,11 +112,11 @@ namespace Lkytal.StatusInfo
 			this.Injector.InjectControl(this.InfoControl);
 			this.OptionsPage = base.GetDialogPage(typeof(OptionsPage)) as OptionsPage;
 
-			UpdateInfoBar();
 			this.RefreshTimer.Enabled = true;
-		}
-		#endregion
 
+			InfoControl.Format = OptionsPage.Format; //first trigger
+		}
+		
 		public void OptionUpdated(string pName, object pValue)
 		{
 			if (pName != null)
@@ -183,7 +181,7 @@ namespace Lkytal.StatusInfo
 
 		int IVsShellPropertyEvents.OnShellPropertyChange(int propid, object var)
 		{
-			if (propid != (int)__VSSPROPID.VSSPROPID_Zombie || (bool)var == false) //- 9053 
+			if (propid != -9053)
 			{
 				return 0;
 			}

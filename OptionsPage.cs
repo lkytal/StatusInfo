@@ -33,7 +33,7 @@ namespace Lkytal.StatusInfo
 		}
 
 		[Category("General")]
-		[Description("Sets the format of the informaton.")]
+		[Description("Sets the format of the information.")]
 		[DisplayName("Format")]
 		public string Format
 		{
@@ -65,7 +65,7 @@ namespace Lkytal.StatusInfo
 		}
 
 		[Category("Design")]
-		[Description("Determines wether fixed width should be used.")]
+		[Description("Determines whether fixed width should be used.")]
 		[DisplayName("Use fixed width")]
 		public bool UseFixedWidth
 		{
