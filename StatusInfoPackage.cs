@@ -34,19 +34,12 @@ namespace Lkytal.StatusInfo
 	[Guid(GuidList.guidStatusInfoPkgString)]
 
 	[ProvideAutoLoad(UIContextGuids80.NoSolution)]
-	//[ProvideAutoLoad(UIContextGuids80.SolutionExists)]
+	[ProvideAutoLoad(UIContextGuids80.SolutionExists)]
+	[ProvideAutoLoad(UIContextGuids80.EmptySolution)]
 	[ProvideOptionPage(typeof(OptionsPage), "StatusBar Info", "General", 0, 0, true)]
 
 	public sealed class StatusInfoPackage : Package
 	{
-		/// <summary>
-		/// Default constructor of the package.
-		/// Inside this method you can place any initialization code that does not require
-		/// any Visual Studio service because at this point the package object is created but
-		/// not sited yet inside Visual Studio environment. The place to do all the other
-		/// initialization is the Initialize method.
-		/// </summary>
-
 		private Timer RefreshTimer;
 
 		private Process IdeProcess;
@@ -66,8 +59,8 @@ namespace Lkytal.StatusInfo
 			Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));
 		}
 
-		/////////////////////////////////////////////////////////////////////////////
-		// Overridden Package Implementation
+		EnvDTE.DTEEvents EventsObj;
+
 		/// <summary>
 		/// Initialization of the package; this method is called right after the package is sited, so this is the place
 		/// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -78,26 +71,29 @@ namespace Lkytal.StatusInfo
 
 			base.Initialize();
 
-			IVsShell ShellService = this.GetService(typeof(SVsShell)) as IVsShell;
+			//IVsShell ShellService = this.GetService(typeof(SVsShell)) as IVsShell;
 
-			Object obj;
+			//Object obj;
 
-			ShellService.GetProperty(-9053, out obj);
+			//ShellService.GetProperty(-9053, out obj);
 
-			if ((bool)obj == false)
-			{
-				new DteInitializer(ShellService, InitExt);
-			}
-			else
-			{
-				InitExt();
-			}
+			//if ((bool)obj == false)
+			//{
+			//	new DteInitializer(ShellService, InitExt);
+			//}
+			//else
+			//{
+			//	InitExt();
+			//}
+
+			var Dte = (EnvDTE.DTE)GetService(typeof(EnvDTE.DTE));
+			EventsObj = Dte.Events.DTEEvents;
+			EventsObj.OnStartupComplete += new EnvDTE._dispDTEEvents_OnStartupCompleteEventHandler(this.InitExt);
+			EventsObj.OnBeginShutdown += new EnvDTE._dispDTEEvents_OnBeginShutdownEventHandler(this.ShutDown);
 		}
 
 		private void InitExt()
 		{
-			//Application.Current.MainWindow.Initialized += new EventHandler(this.Initialized);
-
 			this.RefreshTimer = new Timer(1000);
 			this.RefreshTimer.Elapsed += new ElapsedEventHandler(this.RefreshTimerElapsed);
 			this.RefreshTimer.Disposed += new EventHandler(this.RefreshTimerDisposed);
@@ -116,7 +112,12 @@ namespace Lkytal.StatusInfo
 
 			InfoControl.Format = OptionsPage.Format; //first trigger
 		}
-		
+
+		private void ShutDown()
+		{
+			this.RefreshTimer.Stop();
+		}
+
 		public void OptionUpdated(string pName, object pValue)
 		{
 			if (pName != null)
