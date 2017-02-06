@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -19,7 +18,7 @@ namespace Lkytal.StatusInfo
 		public StatusBarInjector(Window pWindow)
 		{
 			this.window = pWindow;
-			this.window.Initialized += new EventHandler(this.window_Initialized);
+			this.window.Initialized += this.window_Initialized;
 
 			this.FindStatusBar();
 		}
@@ -39,7 +38,7 @@ namespace Lkytal.StatusInfo
 				{
 					return frameworkElement;
 				}
-				child = StatusBarInjector.FindChild(child, childName);
+				child = FindChild(child, childName);
 				if (child != null)
 				{
 					return child;
@@ -50,36 +49,9 @@ namespace Lkytal.StatusInfo
 
 		private void FindStatusBar()
 		{
-			this.statusBar = StatusBarInjector.FindChild(this.window, "StatusBarContainer") as FrameworkElement;
-			this.panel = this.statusBar.Parent as DockPanel;
-		}
-
-		private static FrameworkElement FindStatusBarContainer(Panel panel)
-		{
-			FrameworkElement frameworkElement;
-			IEnumerator enumerator = panel.Children.GetEnumerator();
-			try
-			{
-				while (enumerator.MoveNext())
-				{
-					FrameworkElement current = enumerator.Current as FrameworkElement;
-					if (current == null || !(current.Name == "StatusBarContainer"))
-					{
-						continue;
-					}
-					frameworkElement = current;
-					return frameworkElement;
-				}
-				return null;
-			}
-			finally
-			{
-				IDisposable disposable = enumerator as IDisposable;
-				if (disposable != null)
-				{
-					disposable.Dispose();
-				}
-			}
+			this.statusBar = FindChild(this.window, "StatusBarContainer") as FrameworkElement;
+			var frameworkElement = this.statusBar;
+			if (frameworkElement != null) this.panel = frameworkElement.Parent as DockPanel;
 		}
 
 		public void InjectControl(FrameworkElement pControl)
@@ -93,7 +65,7 @@ namespace Lkytal.StatusInfo
 		public bool IsInjected(FrameworkElement pControl)
 		{
 			bool flag2 = false;
-			this.panel.Dispatcher.Invoke<bool>(() => {
+			this.panel.Dispatcher.Invoke(() => {
 				bool flag = this.panel.Children.Contains(pControl);
 				bool flag1 = flag;
 				flag2 = flag;

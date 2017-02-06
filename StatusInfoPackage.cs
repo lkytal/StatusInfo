@@ -71,32 +71,17 @@ namespace Lkytal.StatusInfo
 
 			base.Initialize();
 
-			//IVsShell ShellService = this.GetService(typeof(SVsShell)) as IVsShell;
-
-			//Object obj;
-
-			//ShellService.GetProperty(-9053, out obj);
-
-			//if ((bool)obj == false)
-			//{
-			//	new DteInitializer(ShellService, InitExt);
-			//}
-			//else
-			//{
-			//	InitExt();
-			//}
-
 			var Dte = (EnvDTE.DTE)GetService(typeof(EnvDTE.DTE));
 			EventsObj = Dte.Events.DTEEvents;
-			EventsObj.OnStartupComplete += new EnvDTE._dispDTEEvents_OnStartupCompleteEventHandler(this.InitExt);
-			EventsObj.OnBeginShutdown += new EnvDTE._dispDTEEvents_OnBeginShutdownEventHandler(this.ShutDown);
+			EventsObj.OnStartupComplete += this.InitExt;
+			EventsObj.OnBeginShutdown += this.ShutDown;
 		}
 
 		private void InitExt()
 		{
 			this.RefreshTimer = new Timer(1000);
-			this.RefreshTimer.Elapsed += new ElapsedEventHandler(this.RefreshTimerElapsed);
-			this.RefreshTimer.Disposed += new EventHandler(this.RefreshTimerDisposed);
+			this.RefreshTimer.Elapsed += this.RefreshTimerElapsed;
+			this.RefreshTimer.Disposed += this.RefreshTimerDisposed;
 			this.IdeProcess = Process.GetCurrentProcess();
 			this.InfoControl = new InfoControl((long)(new ComputerInfo()).TotalPhysicalMemory);
 			this.Injector = new StatusBarInjector(Application.Current.MainWindow);
@@ -106,11 +91,11 @@ namespace Lkytal.StatusInfo
 
 			this.IdeProcess.InitCpuUsage();
 			this.Injector.InjectControl(this.InfoControl);
-			this.OptionsPage = base.GetDialogPage(typeof(OptionsPage)) as OptionsPage;
+			this.OptionsPage = GetDialogPage(typeof(OptionsPage)) as OptionsPage;
 
 			this.RefreshTimer.Enabled = true;
 
-			InfoControl.Format = OptionsPage.Format; //first trigger
+			if (OptionsPage != null) InfoControl.Format = OptionsPage.Format; //first trigger
 		}
 
 		private void ShutDown()
@@ -122,21 +107,20 @@ namespace Lkytal.StatusInfo
 		{
 			if (pName != null)
 			{
-				if (pName == "Format")
+				switch (pName)
 				{
-					this.InfoControl.Format = (string)pValue;
-				}
-				else if (pName == "Interval")
-				{
-					this.RefreshTimer.Interval = (int)pValue;
-				}
-				else if (pName == "UseFixedWidth")
-				{
-					this.InfoControl.UseFixedWidth = (bool)pValue;
-				}
-				else if (pName == "FixedWidth")
-				{
-					this.InfoControl.FixedWidth = (int)pValue;
+					case "Format":
+						this.InfoControl.Format = (string)pValue;
+						break;
+					case "Interval":
+						this.RefreshTimer.Interval = (int)pValue;
+						break;
+					case "UseFixedWidth":
+						this.InfoControl.UseFixedWidth = (bool)pValue;
+						break;
+					case "FixedWidth":
+						this.InfoControl.FixedWidth = (int)pValue;
+						break;
 				}
 			}
 		}
@@ -177,7 +161,7 @@ namespace Lkytal.StatusInfo
 			// Set an event handler to detect when the IDE is fully initialized
 			int hr = this.ShellService.AdviseShellPropertyChanges(this, out this.Cookie);
 
-			Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(hr);
+			ErrorHandler.ThrowOnFailure(hr);
 		}
 
 		int IVsShellPropertyEvents.OnShellPropertyChange(int propid, object var)
@@ -190,7 +174,7 @@ namespace Lkytal.StatusInfo
 			// Release the event handler to detect when the IDE is fully initialized
 			int hr = this.ShellService.UnadviseShellPropertyChanges(this.Cookie);
 
-			Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(hr);
+			ErrorHandler.ThrowOnFailure(hr);
 
 			this.Cookie = 0;
 
