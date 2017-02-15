@@ -1,15 +1,8 @@
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Markup;
-using System.Windows.Media;
-using System.Reflection;
 
 namespace System.Windows.Media
 {
@@ -144,9 +137,9 @@ namespace System
 		{
 			Dictionary<string, int> strs = new Dictionary<string, int>();
 			String[] strArrays = anyOf;
-			for (int i = 0; i < strArrays.Length; i++)
+
+			foreach (string str in strArrays)
 			{
-				string str = strArrays[i];
 				int num = @string.IndexOf(str, startIndex, count, StringComparison.Ordinal);
 				if (num > -1)
 				{
@@ -225,9 +218,8 @@ namespace System
 		{
 			Dictionary<string, int> strs = new Dictionary<string, int>();
 			String[] strArrays = anyOf;
-			for (int i = 0; i < strArrays.Length; i++)
+			foreach (string str in strArrays)
 			{
-				string str = strArrays[i];
 				int num = @string.LastIndexOf(str, startIndex, count, StringComparison.Ordinal);
 				if (num > -1)
 				{
@@ -242,41 +234,6 @@ namespace System
 			KeyValuePair<string, int> keyValuePair = strs.ElementAt(0);
 			foundString = keyValuePair.Key;
 			return keyValuePair.Value;
-		}
-	}
-
-	public static class ObjectExtension
-	{
-		public const BindingFlags AllMembers = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-
-		[Conditional("DEBUG")]
-		public static void DebugFields(this object @object)
-		{
-		}
-
-		[Conditional("DEBUG")]
-		public static void DebugFields(this object @object, BindingFlags bindingAttr)
-		{
-			FieldInfo[] fields = @object.GetType().GetFields(bindingAttr);
-			for (int i = 0; i < fields.Length; i++)
-			{
-				FieldInfo fieldInfo = fields[i];
-			}
-		}
-
-		[Conditional("DEBUG")]
-		public static void DebugProperties(this object @object)
-		{
-		}
-
-		[Conditional("DEBUG")]
-		public static void DebugProperties(this object @object, BindingFlags bindingAttr)
-		{
-			PropertyInfo[] properties = @object.GetType().GetProperties(bindingAttr);
-			for (int i = 0; i < properties.Length; i++)
-			{
-				bool canRead = properties[i].CanRead;
-			}
 		}
 	}
 }

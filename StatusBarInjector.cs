@@ -1,26 +1,24 @@
 using System;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace Lkytal.StatusInfo
 {
 	internal class StatusBarInjector
 	{
-		private Window window;
+		private readonly Window MainWindow;
 
 		private FrameworkElement statusBar;
 
 		private Panel panel;
 
-		public StatusBarInjector(Window pWindow)
+		public StatusBarInjector(Window pMainWindow)
 		{
-			this.window = pWindow;
-			this.window.Initialized += this.window_Initialized;
+			MainWindow = pMainWindow;
+			MainWindow.Initialized += MainWindowInitialized;
 
-			this.FindStatusBar();
+			FindStatusBar();
 		}
 
 		private static DependencyObject FindChild(DependencyObject parent, string childName)
@@ -29,6 +27,7 @@ namespace Lkytal.StatusInfo
 			{
 				return null;
 			}
+
 			int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
 			for (int i = 0; i < childrenCount; i++)
 			{
@@ -49,24 +48,24 @@ namespace Lkytal.StatusInfo
 
 		private void FindStatusBar()
 		{
-			this.statusBar = FindChild(this.window, "StatusBarContainer") as FrameworkElement;
-			var frameworkElement = this.statusBar;
-			if (frameworkElement != null) this.panel = frameworkElement.Parent as DockPanel;
+			statusBar = FindChild(MainWindow, "StatusBarContainer") as FrameworkElement;
+			var frameworkElement = statusBar;
+			if (frameworkElement != null) panel = frameworkElement.Parent as DockPanel;
 		}
 
 		public void InjectControl(FrameworkElement pControl)
 		{
-			this.panel.Dispatcher.Invoke(() => {
+			panel.Dispatcher.Invoke(() => {
 				pControl.SetValue(DockPanel.DockProperty, Dock.Right);
-				this.panel.Children.Insert(1, pControl);
+				panel.Children.Insert(1, pControl);
 			});
 		}
 
 		public bool IsInjected(FrameworkElement pControl)
 		{
 			bool flag2 = false;
-			this.panel.Dispatcher.Invoke(() => {
-				bool flag = this.panel.Children.Contains(pControl);
+			panel.Dispatcher.Invoke(() => {
+				bool flag = panel.Children.Contains(pControl);
 				bool flag1 = flag;
 				flag2 = flag;
 				return flag1;
@@ -76,10 +75,10 @@ namespace Lkytal.StatusInfo
 
 		public void UninjectControl(FrameworkElement pControl)
 		{
-			this.panel.Dispatcher.Invoke(() => this.panel.Children.Remove(pControl));
+			panel.Dispatcher.Invoke(() => panel.Children.Remove(pControl));
 		}
 
-		private void window_Initialized(object sender, EventArgs e)
+		private void MainWindowInitialized(object sender, EventArgs e)
 		{
 		}
 	}

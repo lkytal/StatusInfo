@@ -2,16 +2,14 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
-using System.ComponentModel.Design;
-using Microsoft.Win32;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualBasic.Devices;
 using System.Timers;
 using System.Windows;
+using EnvDTE;
+using Microsoft.VisualBasic.Devices;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+using Process = System.Diagnostics.Process;
 
 namespace Lkytal.StatusInfo
 {
@@ -54,12 +52,7 @@ namespace Lkytal.StatusInfo
 
 		private OptionsPage OptionsPage;
 
-		public StatusInfoPackage()
-		{
-			Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));
-		}
-
-		EnvDTE.DTEEvents EventsObj;
+		private DTEEvents EventsObj;
 
 		/// <summary>
 		/// Initialization of the package; this method is called right after the package is sited, so this is the place
@@ -67,67 +60,62 @@ namespace Lkytal.StatusInfo
 		/// </summary>
 		protected override void Initialize()
 		{
-			Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
+			Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
 
 			base.Initialize();
 
-			var Dte = (EnvDTE.DTE)GetService(typeof(EnvDTE.DTE));
+			var Dte = (DTE)GetService(typeof(DTE));
 			EventsObj = Dte.Events.DTEEvents;
-			EventsObj.OnStartupComplete += this.InitExt;
-			EventsObj.OnBeginShutdown += this.ShutDown;
+			EventsObj.OnStartupComplete += InitExt;
+			EventsObj.OnBeginShutdown += ShutDown;
 		}
 
 		private void InitExt()
 		{
-			this.RefreshTimer = new Timer(1000);
-			this.RefreshTimer.Elapsed += this.RefreshTimerElapsed;
-			this.RefreshTimer.Disposed += this.RefreshTimerDisposed;
-			this.IdeProcess = Process.GetCurrentProcess();
-			this.InfoControl = new InfoControl((long)(new ComputerInfo()).TotalPhysicalMemory);
-			this.Injector = new StatusBarInjector(Application.Current.MainWindow);
-			this.TotalCpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-			this.TotalRamCounter = new PerformanceCounter("Memory", "Available Bytes");
+			RefreshTimer = new Timer(1000);
+			RefreshTimer.Elapsed += RefreshTimerElapsed;
+
+			IdeProcess = Process.GetCurrentProcess();
+			InfoControl = new InfoControl((long)(new ComputerInfo()).TotalPhysicalMemory);
+			Injector = new StatusBarInjector(Application.Current.MainWindow);
+			TotalCpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+			TotalRamCounter = new PerformanceCounter("Memory", "Available Bytes");
 			//end of construct
 
-			this.IdeProcess.InitCpuUsage();
-			this.Injector.InjectControl(this.InfoControl);
-			this.OptionsPage = GetDialogPage(typeof(OptionsPage)) as OptionsPage;
+			IdeProcess.InitCpuUsage();
+			Injector.InjectControl(InfoControl);
+			OptionsPage = GetDialogPage(typeof(OptionsPage)) as OptionsPage;
 
-			this.RefreshTimer.Enabled = true;
+			RefreshTimer.Enabled = true;
 
 			if (OptionsPage != null) InfoControl.Format = OptionsPage.Format; //first trigger
 		}
 
 		private void ShutDown()
 		{
-			this.RefreshTimer.Stop();
+			RefreshTimer.Stop();
+			//this.RefreshTimer.Dispose();
 		}
 
 		public void OptionUpdated(string pName, object pValue)
 		{
-			if (pName != null)
-			{
-				switch (pName)
-				{
-					case "Format":
-						this.InfoControl.Format = (string)pValue;
-						break;
-					case "Interval":
-						this.RefreshTimer.Interval = (int)pValue;
-						break;
-					case "UseFixedWidth":
-						this.InfoControl.UseFixedWidth = (bool)pValue;
-						break;
-					case "FixedWidth":
-						this.InfoControl.FixedWidth = (int)pValue;
-						break;
-				}
-			}
-		}
+			if (pName == null) return;
 
-		private void RefreshTimerDisposed(object sender, EventArgs e)
-		{
-			this.RefreshTimer.Enabled = false;
+			switch (pName)
+			{
+				case "Format":
+					InfoControl.Format = (string)pValue;
+					break;
+				case "Interval":
+					RefreshTimer.Interval = (int)pValue;
+					break;
+				case "UseFixedWidth":
+					InfoControl.UseFixedWidth = (bool)pValue;
+					break;
+				case "FixedWidth":
+					InfoControl.FixedWidth = (int)pValue;
+					break;
+			}
 		}
 
 		private void RefreshTimerElapsed(object sender, ElapsedEventArgs e)
@@ -137,50 +125,13 @@ namespace Lkytal.StatusInfo
 
 		private void UpdateInfoBar()
 		{
-			this.InfoControl.Dispatcher.Invoke(() =>
+			InfoControl.Dispatcher.Invoke(() =>
 			{
-				this.InfoControl.CpuUsage = (int)(this.IdeProcess.GetCpuUsage() * 100);
-				this.InfoControl.RamUsage = this.IdeProcess.WorkingSet64;
-				this.InfoControl.TotalCpuUsage = (int)this.TotalCpuCounter.NextValue();
-				this.InfoControl.FreeRam = this.TotalRamCounter.NextSample().RawValue;
+				InfoControl.CpuUsage = (int)(IdeProcess.GetCpuUsage() * 100);
+				InfoControl.RamUsage = IdeProcess.WorkingSet64;
+				InfoControl.TotalCpuUsage = (int)TotalCpuCounter.NextValue();
+				InfoControl.FreeRam = TotalRamCounter.NextSample().RawValue;
 			});
-		}
-	}
-
-	internal class DteInitializer : IVsShellPropertyEvents
-	{
-		private IVsShell ShellService;
-		private uint Cookie;
-		private Action Callback;
-
-		internal DteInitializer(IVsShell shellService, Action callback)
-		{
-			this.ShellService = shellService;
-			this.Callback = callback;
-
-			// Set an event handler to detect when the IDE is fully initialized
-			int hr = this.ShellService.AdviseShellPropertyChanges(this, out this.Cookie);
-
-			ErrorHandler.ThrowOnFailure(hr);
-		}
-
-		int IVsShellPropertyEvents.OnShellPropertyChange(int propid, object var)
-		{
-			if (propid != -9053)
-			{
-				return 0;
-			}
-
-			// Release the event handler to detect when the IDE is fully initialized
-			int hr = this.ShellService.UnadviseShellPropertyChanges(this.Cookie);
-
-			ErrorHandler.ThrowOnFailure(hr);
-
-			this.Cookie = 0;
-
-			this.Callback();
-
-			return VSConstants.S_OK;
 		}
 	}
 }

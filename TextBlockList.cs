@@ -28,9 +28,5 @@ namespace Lkytal.StatusInfo
 				}
 			}
 		}
-
-		public TextBlockList()
-		{
-		}
 	}
 }
