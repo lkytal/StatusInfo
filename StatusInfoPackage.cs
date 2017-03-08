@@ -6,7 +6,6 @@ using System.Timers;
 using System.Windows;
 using EnvDTE;
 using Microsoft.VisualBasic.Devices;
-using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Process = System.Diagnostics.Process;
