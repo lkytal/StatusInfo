@@ -80,13 +80,10 @@ namespace Lkytal.StatusInfo
 			}
 		}
 
-		public OptionsPage()
-		{
-		}
-
 		private void OptionUpdated(string pName, object pValue)
 		{
-			((StatusInfoPackage)this.GetService(typeof(StatusInfoPackage))).OptionUpdated(pName, pValue);
+			var statusInfoPackage = (StatusInfoPackage)this.GetService(typeof(StatusInfoPackage));
+			statusInfoPackage?.OptionUpdated(pName, pValue);
 		}
 	}
 }

@@ -1,26 +1,20 @@
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Markup;
 using System.Windows.Media;
 
 namespace Lkytal.StatusInfo
 {
 	public partial class InfoControl : UserControl
 	{
-		public readonly static string[] Formats;
+		public static readonly string[] Formats;
 
-		public readonly static string[] FormatDescriptions;
+		public static readonly string[] FormatDescriptions;
 
-		private Dictionary<string, TextBlockList> textBlockLists;
+		private readonly Dictionary<string, TextBlockList> textBlockLists;
 
-		private long totalRam;
+		private readonly long totalRam;
 
 		private int fixedWidth = 150;
 
@@ -31,9 +25,9 @@ namespace Lkytal.StatusInfo
 			set
 			{
 				string CpuValue = string.Format("{0,2}%", value);
-				this.textBlockLists["<CPU>"].Text = CpuValue;
-				this.textBlockLists["<#CPU>"].Text = CpuValue;
-				this.textBlockLists["<#CPU>"].Foreground = this.GetCpuColor(value);
+				textBlockLists["<CPU>"].Text = CpuValue;
+				textBlockLists["<#CPU>"].Text = CpuValue;
+				textBlockLists["<#CPU>"].Foreground = GetCpuColor(value);
 			}
 		}
 
@@ -41,12 +35,12 @@ namespace Lkytal.StatusInfo
 		{
 			get
 			{
-				return this.fixedWidth;
+				return fixedWidth;
 			}
 			set
 			{
-				this.fixedWidth = value;
-				this.UseFixedWidth = this.UseFixedWidth;
+				fixedWidth = value;
+				UseFixedWidth = UseFixedWidth;
 			}
 		}
 
@@ -54,21 +48,18 @@ namespace Lkytal.StatusInfo
 		{
 			set
 			{
-				TextBlockList textBlockList;
-				this.stackPanel.Children.Clear();
-				this.textBlockLists.Clear();
-				this.InitTextBlockLists();
+				stackPanel.Children.Clear();
+				textBlockLists.Clear();
+				InitTextBlockLists();
 				string str = value;
 				while (str != "")
 				{
-					TextBlock nextTextBlock = this.GetNextTextBlock(ref str, out textBlockList);
-					if (textBlockList != null)
-					{
-						textBlockList.Add(nextTextBlock);
-					}
-					this.stackPanel.Children.Add(nextTextBlock);
+					TextBlockList textBlockList;
+					TextBlock nextTextBlock = GetNextTextBlock(ref str, out textBlockList);
+					textBlockList?.Add(nextTextBlock);
+					stackPanel.Children.Add(nextTextBlock);
 				}
-				foreach (TextBlockList textBlockList1 in this.textBlockLists.Values)
+				foreach (TextBlockList textBlockList1 in textBlockLists.Values)
 				{
 					textBlockList1.Text = "N/A";
 				}
@@ -79,29 +70,29 @@ namespace Lkytal.StatusInfo
 		{
 			set
 			{
-				long num = this.totalRam - value;
+				long num = totalRam - value;
 				string readableByteSize = num.ToReadableByteSize("####.00");
 
-				this.textBlockLists["<TOTAL_USE_RAM>"].Text = readableByteSize;
-				this.textBlockLists["<#TOTAL_USE_RAM>"].Text = readableByteSize;
-				this.textBlockLists["<#TOTAL_USE_RAM>"].Foreground = this.GetRamColor(num);
+				textBlockLists["<TOTAL_USE_RAM>"].Text = readableByteSize;
+				textBlockLists["<#TOTAL_USE_RAM>"].Text = readableByteSize;
+				textBlockLists["<#TOTAL_USE_RAM>"].Foreground = GetRamColor(num);
 
-				int num1 = (int) (num * (long) 100 / this.totalRam);
+				int num1 = (int) (num * 100 / totalRam);
 				readableByteSize = string.Format("{0:####.00}%", num1);
-				this.textBlockLists["<TOTAL_USE_RAM%>"].Text = readableByteSize;
-				this.textBlockLists["<#TOTAL_USE_RAM%>"].Text = readableByteSize;
-				this.textBlockLists["<#TOTAL_USE_RAM%>"].Foreground = this.GetRamColor(num);
+				textBlockLists["<TOTAL_USE_RAM%>"].Text = readableByteSize;
+				textBlockLists["<#TOTAL_USE_RAM%>"].Text = readableByteSize;
+				textBlockLists["<#TOTAL_USE_RAM%>"].Foreground = GetRamColor(num);
 
 				readableByteSize = value.ToReadableByteSize("####.00");
-				this.textBlockLists["<FREE_RAM>"].Text = readableByteSize;
-				this.textBlockLists["<#FREE_RAM>"].Text = readableByteSize;
-				this.textBlockLists["<#FREE_RAM>"].Foreground = this.GetRamColor(num);
+				textBlockLists["<FREE_RAM>"].Text = readableByteSize;
+				textBlockLists["<#FREE_RAM>"].Text = readableByteSize;
+				textBlockLists["<#FREE_RAM>"].Foreground = GetRamColor(num);
 
-				num1 = (int) (value * (long) 100 / this.totalRam);
+				num1 = (int) (value * 100 / totalRam);
 				readableByteSize = string.Format("{0:####.00}%", num1);
-				this.textBlockLists["<FREE_RAM%>"].Text = readableByteSize;
-				this.textBlockLists["<#FREE_RAM%>"].Text = readableByteSize;
-				this.textBlockLists["<#FREE_RAM%>"].Foreground = this.GetRamColor(num);
+				textBlockLists["<FREE_RAM%>"].Text = readableByteSize;
+				textBlockLists["<#FREE_RAM%>"].Text = readableByteSize;
+				textBlockLists["<#FREE_RAM%>"].Foreground = GetRamColor(num);
 			}
 		}
 
@@ -110,15 +101,15 @@ namespace Lkytal.StatusInfo
 			set
 			{
 				string readableByteSize = value.ToReadableByteSize("####.00");
-				this.textBlockLists["<RAM>"].Text = readableByteSize;
-				this.textBlockLists["<#RAM>"].Text = readableByteSize;
-				this.textBlockLists["<#RAM>"].Foreground = this.GetRamColor(value);
+				textBlockLists["<RAM>"].Text = readableByteSize;
+				textBlockLists["<#RAM>"].Text = readableByteSize;
+				textBlockLists["<#RAM>"].Foreground = GetRamColor(value);
 
-				int num = (int) (value * (long) 100 / this.totalRam);
+				int num = (int) (value * 100 / totalRam);
 				readableByteSize = string.Format("{0:####.00}%", num);
-				this.textBlockLists["<RAM%>"].Text = readableByteSize;
-				this.textBlockLists["<#RAM%>"].Text = readableByteSize;
-				this.textBlockLists["<#RAM%>"].Foreground = this.GetCpuColor(num);
+				textBlockLists["<RAM%>"].Text = readableByteSize;
+				textBlockLists["<#RAM%>"].Text = readableByteSize;
+				textBlockLists["<#RAM%>"].Foreground = GetCpuColor(num);
 			}
 		}
 
@@ -127,9 +118,9 @@ namespace Lkytal.StatusInfo
 			set
 			{
 				string TotalCpuValue = string.Format("{0,2}%", value);
-				this.textBlockLists["<TOTAL_CPU>"].Text = TotalCpuValue;
-				this.textBlockLists["<#TOTAL_CPU>"].Text = TotalCpuValue;
-				this.textBlockLists["<#TOTAL_CPU>"].Foreground = this.GetCpuColor(value);
+				textBlockLists["<TOTAL_CPU>"].Text = TotalCpuValue;
+				textBlockLists["<#TOTAL_CPU>"].Text = TotalCpuValue;
+				textBlockLists["<#TOTAL_CPU>"].Foreground = GetCpuColor(value);
 			}
 		}
 
@@ -137,34 +128,34 @@ namespace Lkytal.StatusInfo
 		{
 			get
 			{
-				return this.useFixedWidth;
+				return useFixedWidth;
 			}
 			set
 			{
-				this.useFixedWidth = value;
-				if (!this.useFixedWidth)
+				useFixedWidth = value;
+				if (!useFixedWidth)
 				{
-					base.Width = double.NaN;
+					Width = double.NaN;
 					return;
 				}
-				base.Width = this.FixedWidth;
+				Width = FixedWidth;
 			}
 		}
 
 		static InfoControl()
 		{
-			string[] strArrays = new string[] { "CPU", "TOTAL_CPU", "RAM", "FREE_RAM", "TOTAL_USE_RAM", "RAM%", "FREE_RAM%", "TOTAL_USE_RAM%" };
-			InfoControl.Formats = strArrays;
-			string[] strArrayDescriptions = new string[] { "Cpu usage of Visual Studio", "Cpu usage of computer", "Ram usage of Visual Studio", "Free ram of computer", "Ram usage of computer", "Ram usage of Visual Studio in percent", "Free ram of computer in percent", "Ram usage of computer in percent" };
-			InfoControl.FormatDescriptions = strArrayDescriptions;
+			string[] strArrays = { "CPU", "TOTAL_CPU", "RAM", "FREE_RAM", "TOTAL_USE_RAM", "RAM%", "FREE_RAM%", "TOTAL_USE_RAM%" };
+			Formats = strArrays;
+			string[] strArrayDescriptions = { "Cpu usage of Visual Studio", "Cpu usage of computer", "Ram usage of Visual Studio", "Free ram of computer", "Ram usage of computer", "Ram usage of Visual Studio in percent", "Free ram of computer in percent", "Ram usage of computer in percent" };
+			FormatDescriptions = strArrayDescriptions;
 		}
 
 		public InfoControl(long pTotalRam)
 		{
-			this.totalRam = pTotalRam;
-			this.InitializeComponent();
-			this.textBlockLists = new Dictionary<string, TextBlockList>();
-			this.Format = "Loading StatusBarInfos...";
+			totalRam = pTotalRam;
+			InitializeComponent();
+			textBlockLists = new Dictionary<string, TextBlockList>();
+			Format = "Loading StatusBarInfos...";
 		}
 
 		private Brush GetCpuColor(int cpu)
@@ -173,12 +164,12 @@ namespace Lkytal.StatusInfo
 			if (cpu > 50)
 			{
 				Color yellow = Colors.Yellow;
-				color = yellow.FadeTo(Colors.Red, (float) (cpu - 50) / 50f);
+				color = yellow.FadeTo(Colors.Red, (cpu - 50) / 50f);
 			}
 			else
 			{
 				Color white = Colors.White;
-				color = white.FadeTo(Colors.Yellow, (float) cpu / 50f);
+				color = white.FadeTo(Colors.Yellow, cpu / 50f);
 			}
 			return new SolidColorBrush(color);
 		}
@@ -186,12 +177,12 @@ namespace Lkytal.StatusInfo
 		private TextBlock GetNextTextBlock(ref string format, out TextBlockList textBlockList)
 		{
 			string str;
-			TextBlock textBlock = new TextBlock()
+			TextBlock textBlock = new TextBlock
 			{
 				Foreground = new SolidColorBrush(Colors.White)
 			};
 			TextBlock textBlock1 = textBlock;
-			int num = format.IndexOfAny(this.textBlockLists.Keys.ToArray<string>(), out str);
+			int num = format.IndexOfAny(textBlockLists.Keys.ToArray(), out str);
 			if (num == -1)
 			{
 				textBlock1.Text = format;
@@ -208,24 +199,24 @@ namespace Lkytal.StatusInfo
 			{
 				textBlock1.Text = "";
 				format = format.Substring(str.Length);
-				textBlockList = this.textBlockLists[str];
+				textBlockList = textBlockLists[str];
 			}
 			return textBlock1;
 		}
 
 		private Brush GetRamColor(long ram)
 		{
-			int num = (int) (ram * (long) 100 / this.totalRam);
-			return this.GetCpuColor(num);
+			int num = (int) (ram * 100 / totalRam);
+			return GetCpuColor(num);
 		}
 
 		private void InitTextBlockLists()
 		{
-			string[] formats = InfoControl.Formats;
-			for (int i = 0; i < formats.Length; i++)
+			string[] formats = Formats;
+			foreach (string t in formats)
 			{
-				this.textBlockLists[string.Format("<{0}>", formats[i])] = new TextBlockList();
-				this.textBlockLists[string.Format("<#{0}>", formats[i])] = new TextBlockList();
+				textBlockLists[string.Format("<{0}>", t)] = new TextBlockList();
+				textBlockLists[string.Format("<#{0}>", t)] = new TextBlockList();
 			}
 		}
 	}

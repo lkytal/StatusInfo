@@ -73,6 +73,7 @@ namespace Lkytal.StatusInfo
 		{
 			RefreshTimer = new Timer(1000);
 			RefreshTimer.Elapsed += RefreshTimerElapsed;
+			RefreshTimer.Enabled = true;
 
 			IdeProcess = Process.GetCurrentProcess();
 			InfoControl = new InfoControl((long)(new ComputerInfo()).TotalPhysicalMemory);
@@ -83,17 +84,14 @@ namespace Lkytal.StatusInfo
 
 			IdeProcess.InitCpuUsage();
 			Injector.InjectControl(InfoControl);
+
 			OptionsPage = GetDialogPage(typeof(OptionsPage)) as OptionsPage;
-
-			RefreshTimer.Enabled = true;
-
 			if (OptionsPage != null) InfoControl.Format = OptionsPage.Format; //first trigger
 		}
 
 		private void ShutDown()
 		{
 			RefreshTimer.Stop();
-			//this.RefreshTimer.Dispose();
 		}
 
 		public void OptionUpdated(string pName, object pValue)
@@ -124,13 +122,15 @@ namespace Lkytal.StatusInfo
 
 		private void UpdateInfoBar()
 		{
-			InfoControl.Dispatcher.Invoke(() =>
+			Action act = () =>
 			{
-				InfoControl.CpuUsage = (int)(IdeProcess.GetCpuUsage() * 100);
+				InfoControl.CpuUsage = (int) (IdeProcess.GetCpuUsage() * 100);
 				InfoControl.RamUsage = IdeProcess.WorkingSet64;
-				InfoControl.TotalCpuUsage = (int)TotalCpuCounter.NextValue();
+				InfoControl.TotalCpuUsage = (int) TotalCpuCounter.NextValue();
 				InfoControl.FreeRam = TotalRamCounter.NextSample().RawValue;
-			});
+			};
+
+			InfoControl.Dispatcher.BeginInvoke(act);
 		}
 	}
 }
