@@ -8,9 +8,9 @@ namespace Lkytal.StatusInfo
 {
 	public partial class InfoControl : UserControl
 	{
-		public static readonly string[] Formats;
+		public readonly string[] Formats;
 
-		public static readonly string[] FormatDescriptions;
+		public readonly string[] FormatDescriptions;
 
 		private readonly Dictionary<string, TextBlockList> textBlockLists;
 
@@ -142,20 +142,15 @@ namespace Lkytal.StatusInfo
 			}
 		}
 
-		static InfoControl()
-		{
-			string[] strArrays = { "CPU", "TOTAL_CPU", "RAM", "FREE_RAM", "TOTAL_USE_RAM", "RAM%", "FREE_RAM%", "TOTAL_USE_RAM%" };
-			Formats = strArrays;
-			string[] strArrayDescriptions = { "Cpu usage of Visual Studio", "Cpu usage of computer", "Ram usage of Visual Studio", "Free ram of computer", "Ram usage of computer", "Ram usage of Visual Studio in percent", "Free ram of computer in percent", "Ram usage of computer in percent" };
-			FormatDescriptions = strArrayDescriptions;
-		}
-
 		public InfoControl(long pTotalRam)
 		{
+			Formats = new []{ "CPU", "TOTAL_CPU", "RAM", "FREE_RAM", "TOTAL_USE_RAM", "RAM%", "FREE_RAM%", "TOTAL_USE_RAM%" };
+			FormatDescriptions = new [] { "Cpu usage of Visual Studio", "Cpu usage of computer", "Ram usage of Visual Studio", "Free ram of computer", "Ram usage of computer", "Ram usage of Visual Studio in percent", "Free ram of computer in percent", "Ram usage of computer in percent" };
+
 			totalRam = pTotalRam;
 			InitializeComponent();
 			textBlockLists = new Dictionary<string, TextBlockList>();
-			Format = "Loading StatusBarInfos...";
+			Format = "CPU: <#CPU>   RAM: <#RAM>";
 		}
 
 		private Brush GetCpuColor(int cpu)
@@ -176,32 +171,34 @@ namespace Lkytal.StatusInfo
 
 		private TextBlock GetNextTextBlock(ref string format, out TextBlockList textBlockList)
 		{
-			string str;
 			TextBlock textBlock = new TextBlock
 			{
 				Foreground = new SolidColorBrush(Colors.White)
 			};
-			TextBlock textBlock1 = textBlock;
+
+			string str;
 			int num = format.IndexOfAny(textBlockLists.Keys.ToArray(), out str);
+
 			if (num == -1)
 			{
-				textBlock1.Text = format;
+				textBlock.Text = format;
 				format = "";
 				textBlockList = null;
 			}
 			else if (num != 0)
 			{
-				textBlock1.Text = format.Substring(0, num);
+				textBlock.Text = format.Substring(0, num);
 				format = format.Substring(num);
 				textBlockList = null;
 			}
 			else
 			{
-				textBlock1.Text = "";
+				textBlock.Text = "";
 				format = format.Substring(str.Length);
 				textBlockList = textBlockLists[str];
 			}
-			return textBlock1;
+
+			return textBlock;
 		}
 
 		private Brush GetRamColor(long ram)
@@ -212,8 +209,7 @@ namespace Lkytal.StatusInfo
 
 		private void InitTextBlockLists()
 		{
-			string[] formats = Formats;
-			foreach (string t in formats)
+			foreach (string t in Formats)
 			{
 				textBlockLists[string.Format("<{0}>", t)] = new TextBlockList();
 				textBlockLists[string.Format("<#{0}>", t)] = new TextBlockList();

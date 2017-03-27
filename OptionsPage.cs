@@ -33,7 +33,7 @@ namespace Lkytal.StatusInfo
 		}
 
 		[Category("General")]
-		[Description("Sets the format of the information.")]
+		[Description("The format of the information.")]
 		[DisplayName("Format")]
 		public string Format
 		{
@@ -49,7 +49,7 @@ namespace Lkytal.StatusInfo
 		}
 
 		[Category("General")]
-		[Description("Sets the refresh interval in ms.")]
+		[Description("The refresh interval (in ms).")]
 		[DisplayName("Interval")]
 		public int Interval
 		{

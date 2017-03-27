@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Timers;
 using System.Windows;
@@ -38,55 +37,52 @@ namespace Lkytal.StatusInfo
 	public sealed class StatusInfoPackage : Package
 	{
 		private Timer RefreshTimer;
-
 		private Process IdeProcess;
-
+		private InfoControl InfoControl;
 		private StatusBarInjector Injector;
 
-		private InfoControl InfoControl;
-
 		private PerformanceCounter TotalCpuCounter;
-
 		private PerformanceCounter TotalRamCounter;
 
 		private OptionsPage OptionsPage;
-
-		private DTEEvents EventsObj;
-
 		/// <summary>
 		/// Initialization of the package; this method is called right after the package is sited, so this is the place
 		/// where you can put all the initialization code that rely on services provided by VisualStudio.
 		/// </summary>
 		protected override void Initialize()
 		{
-			Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", ToString()));
+			Debug.WriteLine($"Entering Initialize() of: {this}");
 
 			base.Initialize();
 
 			var Dte = (DTE)GetService(typeof(DTE));
-			EventsObj = Dte.Events.DTEEvents;
+			DTEEvents EventsObj = Dte.Events.DTEEvents;
 			EventsObj.OnStartupComplete += InitExt;
 			EventsObj.OnBeginShutdown += ShutDown;
 		}
 
 		private void InitExt()
 		{
+			Debug.WriteLine("Init function loaded");
+
 			RefreshTimer = new Timer(1000);
 			RefreshTimer.Elapsed += RefreshTimerElapsed;
-			RefreshTimer.Enabled = true;
 
 			IdeProcess = Process.GetCurrentProcess();
-			InfoControl = new InfoControl((long)(new ComputerInfo()).TotalPhysicalMemory);
-			Injector = new StatusBarInjector(Application.Current.MainWindow);
+			IdeProcess.InitCpuUsage();
+
 			TotalCpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 			TotalRamCounter = new PerformanceCounter("Memory", "Available Bytes");
-			//end of construct
 
-			IdeProcess.InitCpuUsage();
+			InfoControl = new InfoControl((long)(new ComputerInfo()).TotalPhysicalMemory);
+
+			Injector = new StatusBarInjector(Application.Current.MainWindow);
 			Injector.InjectControl(InfoControl);
 
 			OptionsPage = GetDialogPage(typeof(OptionsPage)) as OptionsPage;
-			if (OptionsPage != null) InfoControl.Format = OptionsPage.Format; //first trigger
+			if (OptionsPage != null) InfoControl.Format = OptionsPage.Format;
+
+			RefreshTimer.Start();
 		}
 
 		private void ShutDown()
@@ -96,7 +92,7 @@ namespace Lkytal.StatusInfo
 
 		public void OptionUpdated(string pName, object pValue)
 		{
-			if (pName == null) return;
+			Debug.WriteLine($"Get option: {pName}");
 
 			switch (pName)
 			{
@@ -111,6 +107,9 @@ namespace Lkytal.StatusInfo
 					break;
 				case "FixedWidth":
 					InfoControl.FixedWidth = (int)pValue;
+					break;
+				default:
+					Debug.WriteLine($"Error nonexsist option: {pName}");
 					break;
 			}
 		}

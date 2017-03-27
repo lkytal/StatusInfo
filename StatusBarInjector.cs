@@ -63,14 +63,13 @@ namespace Lkytal.StatusInfo
 
 		public bool IsInjected(FrameworkElement pControl)
 		{
-			bool flag2 = false;
+			bool flag = false;
+
 			panel.Dispatcher.Invoke(() => {
-				bool flag = panel.Children.Contains(pControl);
-				bool flag1 = flag;
-				flag2 = flag;
-				return flag1;
+				flag = panel.Children.Contains(pControl);
 			});
-			return flag2;
+
+			return flag;
 		}
 
 		public void UninjectControl(FrameworkElement pControl)

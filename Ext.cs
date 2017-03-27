@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Windows;
 
 namespace System.Windows.Media
 {
@@ -32,7 +30,7 @@ namespace System
 		public static string ToReadableByteSize(this long @long, string format)
 		{
 			string str;
-			string str1 = (@long < (long)0 ? "-" : string.Empty);
+			string sign = @long < 0 ? "-" : string.Empty;
 			double num;
 			if (@long >= 1152921504606846976L)
 			{
@@ -58,7 +56,7 @@ namespace System
 			{
 				if (@long < 1024)
 				{
-					return @long.ToString(string.Concat(str1, "0 B"));
+					return @long.ToString(string.Concat(sign, "0 B"));
 				}
 				str = "KB";
 				num = @long;
@@ -69,7 +67,7 @@ namespace System
 				num = @long >> 10;
 			}
 			num = num / 1024;
-			return string.Concat(str1, num.ToString(format), str);
+			return string.Concat(sign, num.ToString(format), str);
 		}
 	}
 
@@ -99,7 +97,7 @@ namespace System
 					foundChar = nullable;
 					char? nullable2 = nullable1;
 					int str = @string[num];
-					flag = (nullable2.GetValueOrDefault() == (char)str);
+					flag = nullable2.GetValueOrDefault() == (char)str;
 				}
 			}
 			return num;
@@ -107,8 +105,7 @@ namespace System
 
 		public static int IndexOfAny(this string @string, String[] anyOf)
 		{
-			string str;
-			return @string.IndexOfAny(anyOf, out str);
+			return @string.IndexOfAny(anyOf, 0);
 		}
 
 		public static int IndexOfAny(this string @string, String[] anyOf, out string foundString)
@@ -118,8 +115,7 @@ namespace System
 
 		public static int IndexOfAny(this string @string, String[] anyOf, int startIndex)
 		{
-			string str;
-			return @string.IndexOfAny(anyOf, startIndex, out str);
+			return @string.IndexOfAny(anyOf, startIndex, @string.Length - startIndex);
 		}
 
 		public static int IndexOfAny(this string @string, String[] anyOf, int startIndex, out string foundString)
@@ -129,8 +125,7 @@ namespace System
 
 		public static int IndexOfAny(this string @string, String[] anyOf, int startIndex, int count)
 		{
-			string str;
-			return @string.IndexOfAny(anyOf, startIndex, count, out str);
+			return @string.IndexOfAny(anyOf, startIndex, count, out string str);
 		}
 
 		public static int IndexOfAny(this string @string, String[] anyOf, int startIndex, int count, out string foundString)
@@ -188,8 +183,7 @@ namespace System
 
 		public static int LastIndexOfAny(this string @string, String[] anyOf)
 		{
-			string str;
-			return @string.LastIndexOfAny(anyOf, out str);
+			return @string.LastIndexOfAny(anyOf, @string.Length - 1);
 		}
 
 		public static int LastIndexOfAny(this string @string, String[] anyOf, out string foundString)
@@ -199,8 +193,7 @@ namespace System
 
 		public static int LastIndexOfAny(this string @string, String[] anyOf, int startIndex)
 		{
-			string str;
-			return @string.LastIndexOfAny(anyOf, startIndex, out str);
+			return @string.LastIndexOfAny(anyOf, startIndex, out string str);
 		}
 
 		public static int LastIndexOfAny(this string @string, String[] anyOf, int startIndex, out string foundString)
@@ -210,8 +203,7 @@ namespace System
 
 		public static int LastIndexOfAny(this string @string, String[] anyOf, int startIndex, int count)
 		{
-			string str;
-			return @string.LastIndexOfAny(anyOf, startIndex, count, out str);
+			return @string.LastIndexOfAny(anyOf, startIndex, count, out string str);
 		}
 
 		public static int LastIndexOfAny(this string @string, String[] anyOf, int startIndex, int count, out string foundString)
@@ -242,9 +234,9 @@ namespace System.Diagnostics
 {
 	public static class ProcessExtension
 	{
-		private static Dictionary<int, DateTime> cpuCheckTimes;
+		private static readonly Dictionary<int, DateTime> cpuCheckTimes;
 
-		private static Dictionary<int, TimeSpan> cpuTimes;
+		private static readonly Dictionary<int, TimeSpan> cpuTimes;
 
 		static ProcessExtension()
 		{
