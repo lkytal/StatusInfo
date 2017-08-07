@@ -24,7 +24,7 @@ namespace Lkytal.StatusInfo
 		{
 			set
 			{
-				string CpuValue = string.Format("{0,2}%", value);
+				string CpuValue = $"{value,2}%";
 				textBlockLists["<CPU>"].Text = CpuValue;
 				textBlockLists["<#CPU>"].Text = CpuValue;
 				textBlockLists["<#CPU>"].Foreground = GetCpuColor(value);
@@ -33,10 +33,7 @@ namespace Lkytal.StatusInfo
 
 		public int FixedWidth
 		{
-			get
-			{
-				return fixedWidth;
-			}
+			get => fixedWidth;
 			set
 			{
 				fixedWidth = value;
@@ -78,7 +75,7 @@ namespace Lkytal.StatusInfo
 				textBlockLists["<#TOTAL_USE_RAM>"].Foreground = GetRamColor(num);
 
 				int num1 = (int) (num * 100 / totalRam);
-				readableByteSize = string.Format("{0:####.00}%", num1);
+				readableByteSize = $"{num1:####.00}%";
 				textBlockLists["<TOTAL_USE_RAM%>"].Text = readableByteSize;
 				textBlockLists["<#TOTAL_USE_RAM%>"].Text = readableByteSize;
 				textBlockLists["<#TOTAL_USE_RAM%>"].Foreground = GetRamColor(num);
@@ -89,7 +86,7 @@ namespace Lkytal.StatusInfo
 				textBlockLists["<#FREE_RAM>"].Foreground = GetRamColor(num);
 
 				num1 = (int) (value * 100 / totalRam);
-				readableByteSize = string.Format("{0:####.00}%", num1);
+				readableByteSize = $"{num1:####.00}%";
 				textBlockLists["<FREE_RAM%>"].Text = readableByteSize;
 				textBlockLists["<#FREE_RAM%>"].Text = readableByteSize;
 				textBlockLists["<#FREE_RAM%>"].Foreground = GetRamColor(num);
@@ -106,7 +103,7 @@ namespace Lkytal.StatusInfo
 				textBlockLists["<#RAM>"].Foreground = GetRamColor(value);
 
 				int num = (int) (value * 100 / totalRam);
-				readableByteSize = string.Format("{0:####.00}%", num);
+				readableByteSize = $"{num:####.00}%";
 				textBlockLists["<RAM%>"].Text = readableByteSize;
 				textBlockLists["<#RAM%>"].Text = readableByteSize;
 				textBlockLists["<#RAM%>"].Foreground = GetCpuColor(num);
@@ -117,7 +114,7 @@ namespace Lkytal.StatusInfo
 		{
 			set
 			{
-				string TotalCpuValue = string.Format("{0,2}%", value);
+				string TotalCpuValue = $"{value,2}%";
 				textBlockLists["<TOTAL_CPU>"].Text = TotalCpuValue;
 				textBlockLists["<#TOTAL_CPU>"].Text = TotalCpuValue;
 				textBlockLists["<#TOTAL_CPU>"].Foreground = GetCpuColor(value);
@@ -126,10 +123,7 @@ namespace Lkytal.StatusInfo
 
 		public bool UseFixedWidth
 		{
-			get
-			{
-				return useFixedWidth;
-			}
+			get => useFixedWidth;
 			set
 			{
 				useFixedWidth = value;
@@ -211,8 +205,8 @@ namespace Lkytal.StatusInfo
 		{
 			foreach (string t in Formats)
 			{
-				textBlockLists[string.Format("<{0}>", t)] = new TextBlockList();
-				textBlockLists[string.Format("<#{0}>", t)] = new TextBlockList();
+				textBlockLists[$"<{t}>"] = new TextBlockList();
+				textBlockLists[$"<#{t}>"] = new TextBlockList();
 			}
 		}
 	}

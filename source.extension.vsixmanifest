@@ -4,8 +4,10 @@
 		<Identity Id="72581eb6-4dcd-4b8f-9add-c4257d4fb9d7" Version="1.2.7" Language="en-US" Publisher="Lkytal" />
 		<DisplayName>StatusInfo</DisplayName>
 		<Description>Display CPU usage and the memory usage of the current instance of Visual Studio in the status bar.</Description>
-		<Icon>icon.png</Icon>
-		<PreviewImage>info.png</PreviewImage>
+		<MoreInfo>https://github.com/lkytal/StatusInfo</MoreInfo>
+		<License>LICENSE.txt</License>
+		<Icon>Resources\icon.png</Icon>
+		<PreviewImage>Resources\info.png</PreviewImage>
 		<Tags>Status, Info, Infomation</Tags>
 	</Metadata>
 	<Installation InstalledByMsi="false">

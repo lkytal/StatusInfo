@@ -121,15 +121,13 @@ namespace Lkytal.StatusInfo
 
 		private void UpdateInfoBar()
 		{
-			Action act = () =>
+			InfoControl.Dispatcher.BeginInvoke((Action)(() =>
 			{
-				InfoControl.CpuUsage = (int) (IdeProcess.GetCpuUsage() * 100);
+				InfoControl.CpuUsage = (int)(IdeProcess.GetCpuUsage() * 100);
 				InfoControl.RamUsage = IdeProcess.WorkingSet64;
-				InfoControl.TotalCpuUsage = (int) TotalCpuCounter.NextValue();
+				InfoControl.TotalCpuUsage = (int)TotalCpuCounter.NextValue();
 				InfoControl.FreeRam = TotalRamCounter.NextSample().RawValue;
-			};
-
-			InfoControl.Dispatcher.BeginInvoke(act);
+			}));
 		}
 	}
 }

@@ -21,10 +21,7 @@ namespace Lkytal.StatusInfo
 		[DisplayName("Fixed width")]
 		public int FixedWith
 		{
-			get
-			{
-				return this.fixedWidth;
-			}
+			get => this.fixedWidth;
 			set
 			{
 				this.fixedWidth = value;
@@ -37,10 +34,7 @@ namespace Lkytal.StatusInfo
 		[DisplayName("Format")]
 		public string Format
 		{
-			get
-			{
-				return this.format;
-			}
+			get => this.format;
 			set
 			{
 				this.format = value;
@@ -53,10 +47,7 @@ namespace Lkytal.StatusInfo
 		[DisplayName("Interval")]
 		public int Interval
 		{
-			get
-			{
-				return this.interval;
-			}
+			get => this.interval;
 			set
 			{
 				this.interval = value;
@@ -69,10 +60,7 @@ namespace Lkytal.StatusInfo
 		[DisplayName("Use fixed width")]
 		public bool UseFixedWidth
 		{
-			get
-			{
-				return this.useFixedWidth;
-			}
+			get => this.useFixedWidth;
 			set
 			{
 				this.useFixedWidth = value;

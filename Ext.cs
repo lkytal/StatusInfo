@@ -125,7 +125,7 @@ namespace System
 
 		public static int IndexOfAny(this string @string, String[] anyOf, int startIndex, int count)
 		{
-			return @string.IndexOfAny(anyOf, startIndex, count, out string str);
+			return @string.IndexOfAny(anyOf, startIndex, count, out string _);
 		}
 
 		public static int IndexOfAny(this string @string, String[] anyOf, int startIndex, int count, out string foundString)
@@ -193,7 +193,7 @@ namespace System
 
 		public static int LastIndexOfAny(this string @string, String[] anyOf, int startIndex)
 		{
-			return @string.LastIndexOfAny(anyOf, startIndex, out string str);
+			return @string.LastIndexOfAny(anyOf, startIndex, out string _);
 		}
 
 		public static int LastIndexOfAny(this string @string, String[] anyOf, int startIndex, out string foundString)
@@ -203,7 +203,7 @@ namespace System
 
 		public static int LastIndexOfAny(this string @string, String[] anyOf, int startIndex, int count)
 		{
-			return @string.LastIndexOfAny(anyOf, startIndex, count, out string str);
+			return @string.LastIndexOfAny(anyOf, startIndex, count, out string _);
 		}
 
 		public static int LastIndexOfAny(this string @string, String[] anyOf, int startIndex, int count, out string foundString)
