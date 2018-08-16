@@ -1,6 +1,7 @@
 ﻿// Guids.cs
 // MUST match guids.h
 using System;
+// ReSharper disable InconsistentNaming
 
 namespace Lkytal.StatusInfo
 {

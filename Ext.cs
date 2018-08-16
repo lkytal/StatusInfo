@@ -103,35 +103,35 @@ namespace System
 			return num;
 		}
 
-		public static int IndexOfAny(this string @string, String[] anyOf)
+		public static int IndexOfAny(this string @string, string[] anyOf)
 		{
 			return @string.IndexOfAny(anyOf, 0);
 		}
 
-		public static int IndexOfAny(this string @string, String[] anyOf, out string foundString)
+		public static int IndexOfAny(this string @string, string[] anyOf, out string foundString)
 		{
 			return @string.IndexOfAny(anyOf, 0, out foundString);
 		}
 
-		public static int IndexOfAny(this string @string, String[] anyOf, int startIndex)
+		public static int IndexOfAny(this string @string, string[] anyOf, int startIndex)
 		{
 			return @string.IndexOfAny(anyOf, startIndex, @string.Length - startIndex);
 		}
 
-		public static int IndexOfAny(this string @string, String[] anyOf, int startIndex, out string foundString)
+		public static int IndexOfAny(this string @string, string[] anyOf, int startIndex, out string foundString)
 		{
 			return @string.IndexOfAny(anyOf, startIndex, @string.Length - startIndex, out foundString);
 		}
 
-		public static int IndexOfAny(this string @string, String[] anyOf, int startIndex, int count)
+		public static int IndexOfAny(this string @string, string[] anyOf, int startIndex, int count)
 		{
 			return @string.IndexOfAny(anyOf, startIndex, count, out string _);
 		}
 
-		public static int IndexOfAny(this string @string, String[] anyOf, int startIndex, int count, out string foundString)
+		public static int IndexOfAny(this string @string, string[] anyOf, int startIndex, int count, out string foundString)
 		{
 			Dictionary<string, int> strs = new Dictionary<string, int>();
-			String[] strArrays = anyOf;
+			string[] strArrays = anyOf;
 
 			foreach (string str in strArrays)
 			{
@@ -181,35 +181,35 @@ namespace System
 			return num;
 		}
 
-		public static int LastIndexOfAny(this string @string, String[] anyOf)
+		public static int LastIndexOfAny(this string @string, string[] anyOf)
 		{
 			return @string.LastIndexOfAny(anyOf, @string.Length - 1);
 		}
 
-		public static int LastIndexOfAny(this string @string, String[] anyOf, out string foundString)
+		public static int LastIndexOfAny(this string @string, string[] anyOf, out string foundString)
 		{
 			return @string.LastIndexOfAny(anyOf, @string.Length - 1, out foundString);
 		}
 
-		public static int LastIndexOfAny(this string @string, String[] anyOf, int startIndex)
+		public static int LastIndexOfAny(this string @string, string[] anyOf, int startIndex)
 		{
 			return @string.LastIndexOfAny(anyOf, startIndex, out string _);
 		}
 
-		public static int LastIndexOfAny(this string @string, String[] anyOf, int startIndex, out string foundString)
+		public static int LastIndexOfAny(this string @string, string[] anyOf, int startIndex, out string foundString)
 		{
 			return @string.LastIndexOfAny(anyOf, startIndex, startIndex + 1, out foundString);
 		}
 
-		public static int LastIndexOfAny(this string @string, String[] anyOf, int startIndex, int count)
+		public static int LastIndexOfAny(this string @string, string[] anyOf, int startIndex, int count)
 		{
 			return @string.LastIndexOfAny(anyOf, startIndex, count, out string _);
 		}
 
-		public static int LastIndexOfAny(this string @string, String[] anyOf, int startIndex, int count, out string foundString)
+		public static int LastIndexOfAny(this string @string, string[] anyOf, int startIndex, int count, out string foundString)
 		{
 			Dictionary<string, int> strs = new Dictionary<string, int>();
-			String[] strArrays = anyOf;
+			string[] strArrays = anyOf;
 			foreach (string str in strArrays)
 			{
 				int num = @string.LastIndexOf(str, startIndex, count, StringComparison.Ordinal);
@@ -234,39 +234,39 @@ namespace System.Diagnostics
 {
 	public static class ProcessExtension
 	{
-		private static readonly Dictionary<int, DateTime> cpuCheckTimes;
+		private static readonly Dictionary<int, DateTime> CpuCheckTimes;
 
-		private static readonly Dictionary<int, TimeSpan> cpuTimes;
+		private static readonly Dictionary<int, TimeSpan> CpuTimes;
 
 		static ProcessExtension()
 		{
-			cpuTimes = new Dictionary<int, TimeSpan>();
-			cpuCheckTimes = new Dictionary<int, DateTime>();
+			CpuTimes = new Dictionary<int, TimeSpan>();
+			CpuCheckTimes = new Dictionary<int, DateTime>();
 		}
 
 		public static double GetCpuUsage(this Process process)
 		{
 			process.Refresh();
-			if (!cpuTimes.ContainsKey(process.Id))
+			if (!CpuTimes.ContainsKey(process.Id))
 			{
 				process.InitCpuUsage();
 			}
 			TimeSpan totalProcessorTime = process.TotalProcessorTime;
 			DateTime utcNow = DateTime.UtcNow;
-			TimeSpan item = totalProcessorTime - cpuTimes[process.Id];
+			TimeSpan item = totalProcessorTime - CpuTimes[process.Id];
 			double totalSeconds = item.TotalSeconds;
-			TimeSpan timeSpan = utcNow - cpuCheckTimes[process.Id];
+			TimeSpan timeSpan = utcNow - CpuCheckTimes[process.Id];
 			double num = timeSpan.TotalSeconds;
 			double processorCount = totalSeconds / (Environment.ProcessorCount * num);
-			cpuTimes[process.Id] = totalProcessorTime;
-			cpuCheckTimes[process.Id] = utcNow;
+			CpuTimes[process.Id] = totalProcessorTime;
+			CpuCheckTimes[process.Id] = utcNow;
 			return processorCount;
 		}
 
 		public static void InitCpuUsage(this Process process)
 		{
-			cpuTimes[process.Id] = process.TotalProcessorTime;
-			cpuCheckTimes[process.Id] = DateTime.UtcNow;
+			CpuTimes[process.Id] = process.TotalProcessorTime;
+			CpuCheckTimes[process.Id] = DateTime.UtcNow;
 		}
 	}
 }

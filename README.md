@@ -6,19 +6,20 @@ Install [StatusInfo](https://marketplace.visualstudio.com/items?itemName=lkytal.
 
 ## Screenshot
 
-![ScreenShot](info.png)
+![ScreenShot](Resources/info.png)
 
 ## Change Log:
 
-* 1.2.6 Support community
-* 1.2.5 Support VS2017
-* 1.2.0 Fix VS2013
-* 1.0.0 First release
+* 1.3.0: Fix null reference
+* 1.2.6: Support community
+* 1.2.5: Support VS2017
+* 1.2.0: Fix VS2013
+* 1.0.0: First release
 
-## My other extentions :
+## My other extensions :
 
 - ### [SmoothScroll](https://marketplace.visualstudio.com/items?itemName=lkytal.SmoothScroll)
-- ### [BuildinCmd](https://marketplace.visualstudio.com/items?itemName=lkytal.BuiltinCmd)
+- ### [BuiltinCmd](https://marketplace.visualstudio.com/items?itemName=lkytal.BuiltinCmd)
 - ### [AutoZoom](https://marketplace.visualstudio.com/items?itemName=lkytal.AutoZoom)
 
 ## Acknowledgment

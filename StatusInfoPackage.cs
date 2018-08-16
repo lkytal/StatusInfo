@@ -36,15 +36,16 @@ namespace Lkytal.StatusInfo
 
 	public sealed class StatusInfoPackage : Package
 	{
-		private Timer RefreshTimer;
-		private Process IdeProcess;
-		private InfoControl InfoControl;
-		private StatusBarInjector Injector;
+		private Timer refreshTimer;
+		private Process ideProcess;
+		private InfoControl infoControl;
+		private StatusBarInjector injector;
 
-		private PerformanceCounter TotalCpuCounter;
-		private PerformanceCounter TotalRamCounter;
+		private PerformanceCounter totalCpuCounter;
+		private PerformanceCounter totalRamCounter;
 
-		private OptionsPage OptionsPage;
+		private OptionsPage optionsPage;
+
 		/// <summary>
 		/// Initialization of the package; this method is called right after the package is sited, so this is the place
 		/// where you can put all the initialization code that rely on services provided by VisualStudio.
@@ -55,39 +56,39 @@ namespace Lkytal.StatusInfo
 
 			base.Initialize();
 
-			var Dte = (DTE)GetService(typeof(DTE));
-			DTEEvents EventsObj = Dte.Events.DTEEvents;
-			EventsObj.OnStartupComplete += InitExt;
-			EventsObj.OnBeginShutdown += ShutDown;
+			var dte = (DTE)GetService(typeof(DTE));
+			DTEEvents eventsObj = dte.Events.DTEEvents;
+			eventsObj.OnStartupComplete += InitExt;
+			eventsObj.OnBeginShutdown += ShutDown;
 		}
 
 		private void InitExt()
 		{
 			Debug.WriteLine("Init function loaded");
 
-			RefreshTimer = new Timer(1000);
-			RefreshTimer.Elapsed += RefreshTimerElapsed;
+			refreshTimer = new Timer(1000);
+			refreshTimer.Elapsed += RefreshTimerElapsed;
 
-			IdeProcess = Process.GetCurrentProcess();
-			IdeProcess.InitCpuUsage();
+			ideProcess = Process.GetCurrentProcess();
+			ideProcess.InitCpuUsage();
 
-			TotalCpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-			TotalRamCounter = new PerformanceCounter("Memory", "Available Bytes");
+			totalCpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+			totalRamCounter = new PerformanceCounter("Memory", "Available Bytes");
 
-			InfoControl = new InfoControl((long)(new ComputerInfo()).TotalPhysicalMemory);
+			infoControl = new InfoControl((long)(new ComputerInfo()).TotalPhysicalMemory);
 
-			Injector = new StatusBarInjector(Application.Current.MainWindow);
-			Injector.InjectControl(InfoControl);
+			injector = new StatusBarInjector(Application.Current.MainWindow);
+			injector.InjectControl(infoControl);
 
-			OptionsPage = GetDialogPage(typeof(OptionsPage)) as OptionsPage;
-			if (OptionsPage != null) InfoControl.Format = OptionsPage.Format;
+			optionsPage = GetDialogPage(typeof(OptionsPage)) as OptionsPage;
+			if (optionsPage != null) infoControl.Format = optionsPage.Format;
 
-			RefreshTimer.Start();
+			refreshTimer.Start();
 		}
 
 		private void ShutDown()
 		{
-			RefreshTimer.Stop();
+			refreshTimer.Stop();
 		}
 
 		public void OptionUpdated(string pName, object pValue)
@@ -97,16 +98,16 @@ namespace Lkytal.StatusInfo
 			switch (pName)
 			{
 				case "Format":
-					InfoControl.Format = (string)pValue;
+					infoControl.Format = (string)pValue;
 					break;
 				case "Interval":
-					RefreshTimer.Interval = (int)pValue;
+					refreshTimer.Interval = (int)pValue;
 					break;
 				case "UseFixedWidth":
-					InfoControl.UseFixedWidth = (bool)pValue;
+					infoControl.UseFixedWidth = (bool)pValue;
 					break;
 				case "FixedWidth":
-					InfoControl.FixedWidth = (int)pValue;
+					infoControl.FixedWidth = (int)pValue;
 					break;
 				default:
 					Debug.WriteLine($"Error nonexsist option: {pName}");
@@ -121,12 +122,12 @@ namespace Lkytal.StatusInfo
 
 		private void UpdateInfoBar()
 		{
-			InfoControl.Dispatcher.BeginInvoke((Action)(() =>
+			infoControl.Dispatcher.BeginInvoke((Action)(() =>
 			{
-				InfoControl.CpuUsage = (int)(IdeProcess.GetCpuUsage() * 100);
-				InfoControl.RamUsage = IdeProcess.WorkingSet64;
-				InfoControl.TotalCpuUsage = (int)TotalCpuCounter.NextValue();
-				InfoControl.FreeRam = TotalRamCounter.NextSample().RawValue;
+				infoControl.CpuUsage = (int)(ideProcess.GetCpuUsage() * 100);
+				infoControl.RamUsage = ideProcess.WorkingSet64;
+				infoControl.TotalCpuUsage = (int)totalCpuCounter.NextValue();
+				infoControl.FreeRam = totalRamCounter.NextSample().RawValue;
 			}));
 		}
 	}

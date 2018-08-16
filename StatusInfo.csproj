@@ -160,7 +160,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="StatusBarInjector.cs" />
     <Compile Include="StatusInfoPackage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
